@@ -1,5 +1,7 @@
 # Hardware-Detached Agent Runtime Roadmap
 
+> The runtime built here is the first of four authorities in a larger machine — continuity, embodiment, truth, and value. See [The Four-System Pipe](AGENT_ECONOMY_ARCHITECTURE.md) for how it combines with the compute resolver, proof network, and settlement engine.
+
 ## Stage 0 — Freeze the contract (Week 1)
 
 Define the narrow product promise:
