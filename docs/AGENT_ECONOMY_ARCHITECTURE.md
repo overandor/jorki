@@ -183,3 +183,9 @@ The important correction is that you are not building four disconnected products
 - **Treasury** controls value.
 
 None may silently impersonate another. That separation is what makes the full pipe auditable, migratable and eventually financeable.
+
+## Related documents
+
+- [Hardware-Detached Agent Runtime Roadmap](AGENT_RUNTIME_ROADMAP.md) — the staged build plan for the continuity authority.
+- [EvidencePipe](EVIDENCEPIPE.md) — the verification ETL company that supplies independently verifiable proof for the truth authority.
+- [Proof-of-Answer](PROOF_OF_ANSWER.md) — the receipt-backed outcome primitive that the value authority settles against.
