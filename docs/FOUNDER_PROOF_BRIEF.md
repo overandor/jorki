@@ -299,9 +299,18 @@ The most important reliability metric is not merely "the agent woke up." It is:
 
 A $3 million seed remains plausible, not guaranteed.
 
-The category is clearly fundable: [Daytona announced a $24 million Series A](https://www.daytona.io/dotfiles/daytona-raises-24m-series-a-to-give-every-agent-a-computer) around infrastructure that provides computers for agents, while [E2B](https://e2b.dev) publicly positions itself as secure isolated computer infrastructure for AI agents and raised a $21 million Series A.
+The category is clearly fundable: [Daytona announced a $24 million Series A](https://www.daytona.io/dotfiles/daytona-raises-24m-series-a-to-give-every-agent-a-computer) around infrastructure that provides computers for agents — after first raising a [$2 million pre-seed](https://www.daytona.io/dotfiles/daytona-raises-2m-in-pre-seed) and then $5 million. [E2B](https://e2b.dev) publicly positions itself as secure isolated computer infrastructure for AI agents and raised a $21 million Series A, bringing its total funding to $32 million. Browserbase raised a $40 million Series B for agent browser infrastructure. These are not identical products, but they confirm investor demand for defensible execution infrastructure beneath agents — and they also mean "we built another sandbox" will not be enough.
 
-The market is also selective. [Carta reported](https://carta.com/learn/startups/fundraising/seed-funding/) a $16 million median pre-money valuation for new seed rounds in Q1 2025, while the number of seed rounds declined 28% year over year. Capital exists, but fewer companies are clearing the evidence threshold.
+The market is also selective. [Carta reported](https://carta.com/learn/startups/fundraising/seed-funding/) a $3.5 million median seed raise for 2024 and a $16 million median pre-money valuation for new seed rounds in Q1 2025, while the number of seed rounds declined 28% year over year. Capital exists, but fewer companies are clearing the evidence threshold.
+
+The fundraising hierarchy is roughly:
+
+- **One-Mac demonstration:** technically interesting — perhaps a $500,000 to $1.5 million pre-seed story.
+- **Mac-to-second-host migration with proof continuity, plus an open specification:** credible $2 million to $3 million seed story.
+- **Repeatable deployment, external developers, design partners, and a clear hosted product:** strong $3 million seed candidate.
+- **Revenue, integrations, and provider participation:** grounds for a larger institutional round.
+
+A $3 million round should target roughly **15 to 24 months of runway**, covering a small systems team, security work, hosted infrastructure, independent audits, and initial customer deployments.
 
 The financing gate is:
 
