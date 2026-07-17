@@ -8,7 +8,7 @@ The core promise:
 
 > EvidencePipe turns "the tests passed" into portable, independently verifiable proof — and prevents autonomous systems from acting externally without human authorization.
 
-It supplies the verification layer that the [four-system pipe](AGENT_ECONOMY_ARCHITECTURE.md)'s Proof and Capability Continuity Network depends on, and its receipts are the evidence backbone of the [Proof-of-Answer economy](PROOF_OF_ANSWER.md).
+EvidencePipe sits **outside the canonical runtime project** — per the [founder proof brief](FOUNDER_PROOF_BRIEF.md), the runtime's receipt protocol is an internal primitive of the runtime, not this product pasted onto it. EvidencePipe is a standalone company thesis that shares the same evidence philosophy, and its receipts are the evidence backbone of the [Proof-of-Answer economy](PROOF_OF_ANSWER.md).
 
 ## Product boundary
 

@@ -1,6 +1,6 @@
 # Hardware-Detached Agent Runtime Roadmap
 
-> The runtime built here is the first of four authorities in a larger machine — continuity, embodiment, truth, and value. See [The Four-System Pipe](AGENT_ECONOMY_ARCHITECTURE.md) for how it combines with the compute resolver, proof network, and settlement engine.
+> The canonical statement of this thesis is the [Founder Proof Brief](FOUNDER_PROOF_BRIEF.md) — where this roadmap and the brief overlap, the brief wins. The runtime built here is also the first of four authorities in a larger machine — continuity, embodiment, truth, and value. See [The Four-System Pipe](AGENT_ECONOMY_ARCHITECTURE.md) for how it combines with the compute resolver, proof network, and settlement engine.
 
 ## Stage 0 — Freeze the contract (Week 1)
 
