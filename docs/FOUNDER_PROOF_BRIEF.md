@@ -2,13 +2,61 @@
 
 > This is the canonical version of the thesis. Where other documents in this directory overlap with it, this brief wins. Use this version in the repository, architecture document, landing page, demonstration script and investor material.
 
-## Canonical definition
+## Target definition
+
+> This section describes the product being built, not what exists today. See "Implemented today" immediately below for current status.
 
 A **storage-rooted, proof-carrying runtime for persistent AI agents**.
 
-An agent can suspend into a signed, provider-neutral capsule; release its active execution resources; wake through the same stable SSH identity on fresh compatible compute; recover its workspace, objectives, authority and evidence chain; continue unfinished work; and collapse back into storage when idle.
+An agent will be able to suspend into a signed, provider-neutral capsule; release its active execution resources; wake through the same stable SSH identity on fresh compatible compute; recover its workspace, objectives, authority and evidence chain; continue unfinished work; and collapse back into storage when idle.
 
 The durable identity belongs to the capsule — not to a container, VM, process, cloud account or physical computer.
+
+## Implemented today
+
+Status as of **2026-07-19**. Anything not listed as built here is a target, regardless of how confidently later sections describe it.
+
+**Built and tested:**
+
+- Capsule and lineage logic
+- Semantic-quiescence and fencing invariants (including SQLite fencing)
+- HMAC capsule sealing
+- Offline verification by an authorized (shared-secret-holding) verifier
+
+**Not built:**
+
+- Isolated execution provider
+- Stable SSH gateway and identity
+- Independent-host (A → B) migration
+- Reliability harness
+
+Until the decisive demonstration passes, fundraising language must use "we are building," not "we built."
+
+### Sealing today is HMAC, not asymmetric signatures
+
+HMAC proves integrity to parties holding the shared secret — but any holder of that secret can also mint a valid authentication tag. It is not independent public-key attribution. Until asymmetric signing (e.g. Ed25519) exists, the honest terms are:
+
+- "authenticated capsule"
+- "shared-secret integrity verification"
+- "offline verification by an authorized verifier"
+
+Do **not** say: "independently attributable signature," "public offline verification," or "verifier cannot forge." Where later sections say "cryptographic signature" or "independent verifier," read them as targets gated on asymmetric signing.
+
+## Claim ledger
+
+Every claim carries one of four states — **Proposed → Implemented → Tested → Independently reproduced** — and may only advance with evidence (repository component, test name, receipt artifact, or reproduction record).
+
+| Claim | State (2026-07-19) |
+|---|---|
+| Capsule integrity | Tested |
+| HMAC authentication | Tested |
+| Effect quiescence | Tested |
+| SQLite fencing | Tested |
+| Isolated runtime destruction | Proposed |
+| Stable SSH identity | Proposed |
+| Host A → Host B restoration | Proposed |
+| 100 successful migrations | Proposed |
+| External developer reproduction | Not started |
 
 ## The first product has exactly one job
 
@@ -303,6 +351,8 @@ The category is clearly fundable: [Daytona announced a $24 million Series A](htt
 
 The market is also selective. [Carta reported](https://carta.com/learn/startups/fundraising/seed-funding/) a $3.5 million median seed raise for 2024 and a $16 million median pre-money valuation for new seed rounds in Q1 2025, while the number of seed rounds declined 28% year over year. Capital exists, but fewer companies are clearing the evidence threshold.
 
+The figures below are **illustrative fundraising positioning, not underwriting conclusions**. A migration demo does not mechanically produce a check; financing also depends on founder credibility, market urgency, buyer interviews, competitive differentiation, investor access, ownership and cap table, security posture, and current fundraising conditions.
+
 The fundraising hierarchy is roughly:
 
 - **One-Mac demonstration:** technically interesting — perhaps a $500,000 to $1.5 million pre-seed story.
@@ -340,6 +390,12 @@ What would probably **not** justify $3 million:
 - A demo where both "providers" are just two folders on the same running process
 
 # Canonical fundraising claim
+
+The claim supportable **today**:
+
+> **We are building a storage-rooted runtime for persistent AI agents. Capsule integrity, lineage, semantic quiescence, and fencing invariants are implemented and tested; isolated execution, stable SSH identity, and cross-host migration are the next gates.**
+
+The claim to use **only after the decisive demonstration passes**:
 
 > **We built a storage-rooted runtime for persistent AI agents. An agent can suspend into a portable, proof-carrying capsule, release its active machine, wake through the same SSH identity on compatible compute, retain its authorized capabilities and unfinished work, and return to storage when idle. Exact restoration is used where environments are compatible; heterogeneous transitions use explicitly labeled semantic restoration.**
 

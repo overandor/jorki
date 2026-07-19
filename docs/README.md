@@ -15,6 +15,7 @@ Documents describing the hardware-detached agent runtime and the economic machin
 | [Hardware-Detached Agent Runtime Roadmap](AGENT_RUNTIME_ROADMAP.md) | The staged build plan (Stages 0–8) with timelines, required tests, and exit gates, from capsule core to hosted control plane. |
 | [The Four-System Pipe](AGENT_ECONOMY_ARCHITECTURE.md) | Combines the runtime with a compute resolver, proof network, and settlement engine into one protocol with four authorities: continuity, embodiment, truth, and value. |
 | [Proof-of-Answer](PROOF_OF_ANSWER.md) | The receipt-backed outcome primitive that lets a durable agent identity earn revenue for verified intellectual work while its compute providers change. |
+| [MirrorLease](MIRRORLEASE.md) | A palindromic lease protocol between an AI conversation and a self-defending local machine: disposable mailboxes, narrow temporary permissions, staged disclosure, forward-and-reverse receipts, and automatic expiration — the owner keeps control. |
 
 ## Outside the canonical project
 
