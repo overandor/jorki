@@ -15,6 +15,15 @@ Documents describing the hardware-detached agent runtime and the economic machin
 | [Hardware-Detached Agent Runtime Roadmap](AGENT_RUNTIME_ROADMAP.md) | The staged build plan (Stages 0–8) with timelines, required tests, and exit gates, from capsule core to hosted control plane. |
 | [The Four-System Pipe](AGENT_ECONOMY_ARCHITECTURE.md) | Combines the runtime with a compute resolver, proof network, and settlement engine into one protocol with four authorities: continuity, embodiment, truth, and value. |
 | [Proof-of-Answer](PROOF_OF_ANSWER.md) | The receipt-backed outcome primitive that lets a durable agent identity earn revenue for verified intellectual work while its compute providers change. |
+| [Nonlocal Coherence](NONLOCAL_COHERENCE.md) | Draft `v0.1` protocol extending the sequential capsule proof to the **parallel** case: fan a sealed capsule out to N shards, each signing its partial, then certify the distributed result equals a single-pass result under a signed quorum. Honest prior-art positioning; priority record in [PRIORITY.md](PRIORITY.md). |
+| [MirrorLease](MIRRORLEASE.md) | A palindromic lease protocol between an AI conversation and a self-defending local machine: disposable mailboxes, narrow temporary permissions, staged disclosure, forward-and-reverse receipts, and automatic expiration — the owner keeps control. |
+
+## Runnable artifacts
+
+| Artifact | What it is |
+|---|---|
+| [`proto/`](../proto/) | Stage-1 capsule prototype (stdlib Python): content-addressed seal / verify / restore, HMAC authentication, lineage epochs. Backs the brief's *Tested* claim-ledger rows. |
+| [`macapp/`](../macapp/) | Native macOS app (SwiftUI + CryptoKit): seal a workspace into an Ed25519-signed capsule, verify it independently, and run **Nonlocal Coherence** — a parallel fan-out that certifies a distributed result equals a single-pass result under a signed quorum. Honest claim boundary in its README. |
 
 ## Outside the canonical project
 

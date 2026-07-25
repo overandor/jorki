@@ -8,7 +8,7 @@ The core promise:
 
 > EvidencePipe turns "the tests passed" into portable, independently verifiable proof — and prevents autonomous systems from acting externally without human authorization.
 
-EvidencePipe sits **outside the canonical runtime project** — per the [founder proof brief](FOUNDER_PROOF_BRIEF.md), the runtime's receipt protocol is an internal primitive of the runtime, not this product pasted onto it. EvidencePipe is a standalone company thesis that shares the same evidence philosophy, and its receipts are the evidence backbone of the [Proof-of-Answer economy](PROOF_OF_ANSWER.md).
+EvidencePipe sits **outside the canonical runtime project** — per the [founder proof brief](FOUNDER_PROOF_BRIEF.md), the runtime's receipt protocol and verifier are mandatory internal components of the runtime, which must function completely without EvidencePipe existing. EvidencePipe is a standalone company thesis that shares the same evidence philosophy and may optionally consume or verify the runtime's receipts, including [Proof-of-Answer receipts](PROOF_OF_ANSWER.md).
 
 ## Product boundary
 

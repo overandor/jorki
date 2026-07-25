@@ -187,5 +187,5 @@ None may silently impersonate another. That separation is what makes the full pi
 ## Related documents
 
 - [Hardware-Detached Agent Runtime Roadmap](AGENT_RUNTIME_ROADMAP.md) — the staged build plan for the continuity authority.
-- [EvidencePipe](EVIDENCEPIPE.md) — the verification ETL company that supplies independently verifiable proof for the truth authority.
+- [EvidencePipe](EVIDENCEPIPE.md) — an optional external product that may consume or verify the runtime's receipts. The truth authority's verifier is a mandatory internal component of the runtime, and the runtime must function completely without EvidencePipe existing.
 - [Proof-of-Answer](PROOF_OF_ANSWER.md) — the receipt-backed outcome primitive that the value authority settles against.

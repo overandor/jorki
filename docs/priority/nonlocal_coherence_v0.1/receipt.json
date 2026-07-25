@@ -1,0 +1,10 @@
+{
+  "agent_id": "hdar-nonlocal-coherence-spec",
+  "epoch": 1,
+  "event": "capsule_sealed",
+  "manifest_hash": "2c6cb545ea68abdac094ee126a95d1f9c10d9680e39aac6090040ca62f7ffbec",
+  "receipt_hash": "ce88671e1dc1be1c5e7a236e6f8221832c6ebca679393466a43013505525c810",
+  "schema": "hdar.receipt/v0.1",
+  "sealed_at_ms": 0,
+  "workspace_root_hash": "223907dde0b3d5a234f7271dfd535a46f9b624bae8990e3fc3b8fcb9dc85f1e9"
+}
