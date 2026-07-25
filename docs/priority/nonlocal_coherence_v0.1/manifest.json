@@ -1,0 +1,23 @@
+{
+  "agent_id": "hdar-nonlocal-coherence-spec",
+  "created_at_ms": 0,
+  "epoch": 1,
+  "file_count": 1,
+  "manifest_hash": "2c6cb545ea68abdac094ee126a95d1f9c10d9680e39aac6090040ca62f7ffbec",
+  "owner_public_key": "ca7d8a4538d45453a391bf4190b06e418a8c802a5ca9f37da2e3d0f528290ed2",
+  "owner_signature": "a07c8702b7370b1f93b21ab6599cea7d9776c40a64a261cf874055c035fb9c3dad5b6cccf4aa8d2e3b77ee495041b4ee29611ffc9501ef0cc6fe3efdc59d150e",
+  "owner_signature_algorithm": "ed25519",
+  "schema": "hdar.desktop-capsule/v0.1",
+  "workspace_manifest": {
+    "files": [
+      {
+        "mode": 420,
+        "rel_path": "NONLOCAL_COHERENCE.md",
+        "sha256": "048b12799d726ebfaeae2f655657982559c9655432ec1d3a8e49fa8dc02f1585",
+        "size": 10455
+      }
+    ],
+    "root_hash": "223907dde0b3d5a234f7271dfd535a46f9b624bae8990e3fc3b8fcb9dc85f1e9",
+    "total_size": 10455
+  }
+}
