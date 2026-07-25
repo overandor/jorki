@@ -1,0 +1,4 @@
+.build/
+HDAR.app/
+*.xcodeproj/
+.DS_Store
