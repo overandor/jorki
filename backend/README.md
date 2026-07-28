@@ -16,8 +16,12 @@ pip install -r requirements.txt
 uvicorn app:app --reload            # http://127.0.0.1:8000  ·  /docs for OpenAPI
 ```
 
-Point the UI at it: the dev server proxies same-origin (`API_BASE=''`), or set
-the base to `http://127.0.0.1:8000` in `src/hooks/useJorkiApi.js`.
+Wire the UI to it: `npm run dev` already proxies the API paths to the backend
+(see `../vite.config.js`), so the console and engine run together with no code
+change. Point at a remote backend with `VITE_API_TARGET=https://… npm run dev`.
+
+Deploy it: `docker build -t jorki-backend . && docker run -p 8000:8000 -v jorki:/data jorki-backend`
+(the `/data` volume persists the SQLite DB).
 
 ## Test
 
@@ -57,10 +61,11 @@ encode/decode round-trip, and session revoke.
 - **SQL is sandboxed:** only a single `SELECT` runs, against an **ephemeral
   in-memory DB** loaded with just that file's chunks. Non-SELECT, stacked
   statements, and `PRAGMA/ATTACH/…` are rejected.
-- **This is an MVP reference**, not the full ~40-endpoint FileOracle. Storage is
-  in-process (restart clears it) — swap in SQLite/Redis for persistence. It does
-  not yet do auth, upload of binary archives, or the DNA/valuation intelligence
-  endpoints. Those are additive.
+- **Persistent:** state lives in SQLite (`JORKI_DB`, default `./jorki.db`) and
+  survives restarts — verified by re-reading the DB from a fresh process.
+- **Still an MVP subset**, not the full ~40-endpoint FileOracle: no auth, no
+  binary-archive upload, and no DNA/valuation intelligence endpoints yet. Those
+  are additive.
 - **Not the HDAR transport.** This is the file-gateway backend. The
   content-addressed *agent-state* transport (owner-signed successor state,
   distributed executors, offline verifier) is the separate invention layer — see

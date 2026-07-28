@@ -1,20 +1,19 @@
 """
 Jorki backend — a content-addressed, metadata-only file-intelligence gateway.
 
-This is the missing backend the Jorki UI (src/hooks/useJorkiApi.js) has always
-called. It implements the same endpoint contract as the live FileOracle service,
-as a clean, self-contained, dependency-light FastAPI app you can run and audit.
+The backend the Jorki UI (src/hooks/useJorkiApi.js) has always called, now in the
+repo as a clean, self-contained, SQLite-backed FastAPI app with **zero external
+LLM calls**. Content stays on the host you run this on.
 
-Design principles
------------------
+Design
+------
 - **Content-addressed.** A file's id IS the first 12 hex of its SHA-256. Same
-  bytes in → same id. Re-indexing is idempotent.
-- **Metadata-first.** Every answer is derived deterministically from the indexed
-  content and its structure. There are **no external LLM calls** in this service
-  at all — nothing about your files is sent anywhere. Content stays on the host
-  you run this on.
-- **Verifiable.** Each file carries a Merkle root over its chunk hashes; the
-  root and per-chunk hashes are returned so a client can re-derive them.
+  bytes in → same id; re-indexing is idempotent.
+- **Metadata-first, no LLM.** Every answer is derived deterministically from the
+  indexed content and its structure. Nothing is sent anywhere.
+- **Verifiable.** Each file carries a Merkle root over its chunk hashes.
+- **Persistent.** State lives in SQLite (`JORKI_DB`, default `./jorki.db`) and
+  survives restarts.
 
 Run:  uvicorn app:app --reload      (from backend/)
 Docs: http://127.0.0.1:8000/docs
@@ -24,38 +23,61 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import os
 import re
 import sqlite3
 import time
 from collections import Counter
-from typing import Any, Dict, List, Optional
+from contextlib import contextmanager
+from typing import Any, Dict, List
 
 from fastapi import FastAPI, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-app = FastAPI(title="Jorki Backend", version="0.1.0",
+app = FastAPI(title="Jorki Backend", version="0.2.0",
               description="Content-addressed, metadata-only file-intelligence gateway.")
-
-# The Jorki UI is served from a different origin (Vite dev server / Pages).
-app.add_middleware(
-    CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"],
-)
+app.add_middleware(CORSMiddleware, allow_origins=["*"],
+                   allow_methods=["*"], allow_headers=["*"])
 
 SUPERPOSE_PREFIX = "JORKI:v1:"
-
-# ─────────────────────────────── storage ────────────────────────────────
-# In-memory registry. Each file: content chunks + derived metadata. No content
-# ever leaves this process except through the read endpoints the owner calls.
-REGISTRY: Dict[str, Dict[str, Any]] = {}
+DB_PATH = os.environ.get("JORKI_DB", os.path.join(os.path.dirname(__file__), "jorki.db"))
 
 
+@contextmanager
+def db():
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+    try:
+        yield con
+        con.commit()
+    finally:
+        con.close()
+
+
+def init_db():
+    with db() as con:
+        con.executescript("""
+        CREATE TABLE IF NOT EXISTS files(
+          file_id TEXT PRIMARY KEY, name TEXT, size INTEGER, sha256 TEXT, ext TEXT,
+          line_count INTEGER, chunk_count INTEGER, merkle_root TEXT,
+          top_terms TEXT, symbols TEXT, created_at REAL, revoked INTEGER DEFAULT 0,
+          access INTEGER DEFAULT 0);
+        CREATE TABLE IF NOT EXISTS chunks(
+          file_id TEXT, idx INTEGER, text TEXT, hash TEXT, length INTEGER,
+          PRIMARY KEY(file_id, idx));
+        """)
+
+
+init_db()
+
+
+# ─────────────────────────────── helpers ────────────────────────────────
 def sha256_hex(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
 
 
 def merkle_root(hashes: List[str]) -> str:
-    """SHA-256 Merkle root over the ordered chunk hashes (duplicate-last padding)."""
     if not hashes:
         return sha256_hex(b"")
     layer = [bytes.fromhex(h) for h in hashes]
@@ -68,7 +90,6 @@ def merkle_root(hashes: List[str]) -> str:
 
 
 def chunk_text(text: str, target: int = 800) -> List[str]:
-    """Split into ~target-char chunks on paragraph/line boundaries."""
     if not text.strip():
         return []
     blocks, cur, size = [], [], 0
@@ -85,65 +106,34 @@ def chunk_text(text: str, target: int = 800) -> List[str]:
 
 SYMBOL_RE = re.compile(
     r"^\s*(?:def|class|function|func|async\s+def)\s+([A-Za-z_][\w]*)"
-    r"|(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=",
-    re.MULTILINE,
-)
+    r"|(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=", re.MULTILINE)
 WORD_RE = re.compile(r"[A-Za-z][A-Za-z0-9_]{2,}")
 STOP = set("the and for that this with from your you are was were has have not "
            "but all can will out get file files type text data code use using".split())
 
 
-def build_index(name: str, content: bytes) -> Dict[str, Any]:
-    file_id = sha256_hex(content)[:12]
-    try:
-        text = content.decode("utf-8", errors="replace")
-    except Exception:
-        text = ""
-    chunks = chunk_text(text)
-    chunk_hashes = [sha256_hex(c.encode()) for c in chunks]
-    ext = name.rsplit(".", 1)[-1].lower() if "." in name else ""
-    words = [w.lower() for w in WORD_RE.findall(text)]
-    top_terms = [{"term": t, "count": n}
-                 for t, n in Counter(w for w in words if w not in STOP).most_common(12)]
-    symbols = sorted({m.group(1) or m.group(2) for m in SYMBOL_RE.finditer(text)
-                      if (m.group(1) or m.group(2))})
-    return {
-        "file_id": file_id,
-        "name": name,
-        "size": len(content),
-        "sha256": sha256_hex(content),
-        "ext": ext,
-        "line_count": text.count("\n") + 1 if text else 0,
-        "chunk_count": len(chunks),
-        "merkle_root": merkle_root(chunk_hashes),
-        "top_terms": top_terms,
-        "symbols": symbols[:64],
-        "created_at": time.time(),
-        "revoked": False,
-        "access": 0,
-        "_chunks": chunks,
-        "_chunk_hashes": chunk_hashes,
-    }
+def require(file_id: str) -> sqlite3.Row:
+    with db() as con:
+        row = con.execute("SELECT * FROM files WHERE file_id=?", (file_id,)).fetchone()
+        if row is None:
+            raise HTTPException(404, {"error": "file_not_found", "file_id": file_id})
+        if row["revoked"]:
+            raise HTTPException(404, {"error": "session_revoked", "file_id": file_id})
+        con.execute("UPDATE files SET access=access+1 WHERE file_id=?", (file_id,))
+    return row
 
 
-def public_meta(rec: Dict[str, Any]) -> Dict[str, Any]:
-    return {k: v for k, v in rec.items() if not k.startswith("_")}
-
-
-def require(file_id: str) -> Dict[str, Any]:
-    rec = REGISTRY.get(file_id)
-    if rec is None:
-        raise HTTPException(404, {"error": "file_not_found", "file_id": file_id})
-    if rec["revoked"]:
-        raise HTTPException(404, {"error": "session_revoked", "file_id": file_id})
-    rec["access"] += 1
-    return rec
+def get_chunks(file_id: str) -> List[sqlite3.Row]:
+    with db() as con:
+        return con.execute(
+            "SELECT idx, text, hash, length FROM chunks WHERE file_id=? ORDER BY idx",
+            (file_id,)).fetchall()
 
 
 # ─────────────────────────────── models ─────────────────────────────────
 class IndexIn(BaseModel):
     name: str
-    content: str          # raw text (or base64 if is_base64)
+    content: str
     is_base64: bool = False
 
 
@@ -155,41 +145,68 @@ class SqlIn(BaseModel):
 @app.post("/index")
 def index_file(body: IndexIn):
     raw = base64.b64decode(body.content) if body.is_base64 else body.content.encode()
-    rec = build_index(body.name, raw)
-    REGISTRY[rec["file_id"]] = rec
-    return {"file_id": rec["file_id"], "merkle_root": rec["merkle_root"],
-            "chunk_count": rec["chunk_count"], "size": rec["size"]}
+    file_id = sha256_hex(raw)[:12]
+    text = raw.decode("utf-8", errors="replace")
+    chunks = chunk_text(text)
+    chunk_hashes = [sha256_hex(c.encode()) for c in chunks]
+    ext = body.name.rsplit(".", 1)[-1].lower() if "." in body.name else ""
+    words = [w.lower() for w in WORD_RE.findall(text)]
+    top_terms = [{"term": t, "count": n}
+                 for t, n in Counter(w for w in words if w not in STOP).most_common(12)]
+    symbols = sorted({m.group(1) or m.group(2) for m in SYMBOL_RE.finditer(text)
+                      if (m.group(1) or m.group(2))})[:64]
+    root = merkle_root(chunk_hashes)
+    with db() as con:
+        con.execute("DELETE FROM files WHERE file_id=?", (file_id,))
+        con.execute("DELETE FROM chunks WHERE file_id=?", (file_id,))
+        con.execute(
+            "INSERT INTO files VALUES (?,?,?,?,?,?,?,?,?,?,?,0,0)",
+            (file_id, body.name, len(raw), sha256_hex(raw), ext,
+             (text.count("\n") + 1 if text else 0), len(chunks), root,
+             json.dumps(top_terms), json.dumps(symbols), time.time()))
+        con.executemany(
+            "INSERT INTO chunks VALUES (?,?,?,?,?)",
+            [(file_id, i, c, chunk_hashes[i], len(c)) for i, c in enumerate(chunks)])
+    return {"file_id": file_id, "merkle_root": root,
+            "chunk_count": len(chunks), "size": len(raw)}
 
 
 # ─────────────────────────────── read ───────────────────────────────────
 @app.get("/health")
 def health():
-    return {"status": "ok", "files_registered": len(REGISTRY),
-            "service": "jorki-backend", "version": app.version, "llm_calls": 0}
+    with db() as con:
+        n = con.execute("SELECT count(*) c FROM files").fetchone()["c"]
+    return {"status": "ok", "files_registered": n, "service": "jorki-backend",
+            "version": app.version, "llm_calls": 0, "persistent": True}
 
 
 @app.get("/files")
 def files():
-    return {"files": [
-        {"file_id": r["file_id"], "name": r["name"], "size": r["size"],
-         "chunk_count": r["chunk_count"], "created_at": r["created_at"],
-         "revoked": r["revoked"]}
-        for r in REGISTRY.values()]}
+    with db() as con:
+        rows = con.execute(
+            "SELECT file_id,name,size,chunk_count,created_at,revoked FROM files "
+            "ORDER BY created_at DESC").fetchall()
+    return {"files": [dict(r) for r in rows]}
 
 
 @app.get("/meta/{file_id}")
 def meta(file_id: str):
-    return public_meta(require(file_id))
+    r = require(file_id)
+    d = dict(r)
+    d["top_terms"] = json.loads(d["top_terms"])
+    d["symbols"] = json.loads(d["symbols"])
+    return d
 
 
 @app.get("/summary/{file_id}")
 def summary(file_id: str):
     r = require(file_id)
+    symbols = json.loads(r["symbols"])
     return {"file_id": file_id, "method": "deterministic (no LLM)",
             "line_count": r["line_count"], "chunk_count": r["chunk_count"],
-            "top_terms": r["top_terms"], "symbols": r["symbols"],
+            "top_terms": json.loads(r["top_terms"]), "symbols": symbols,
             "headline": f'{r["name"]} — {r["line_count"]} lines, '
-                        f'{len(r["symbols"])} symbols, {r["chunk_count"]} chunks'}
+                        f'{len(symbols)} symbols, {r["chunk_count"]} chunks'}
 
 
 @app.get("/capabilities/{file_id}")
@@ -208,7 +225,8 @@ def capabilities(file_id: str):
 @app.get("/superpose/state/{file_id}")
 def superpose_state(file_id: str):
     r = require(file_id)
-    index_bytes = sum(len(c) for c in r["_chunks"])
+    chunks = get_chunks(file_id)
+    index_bytes = sum(c["length"] for c in chunks)
     ratio = round(r["size"] / index_bytes, 3) if index_bytes else 1.0
     return {"file_id": file_id, "status": "live", "chunk_count": r["chunk_count"],
             "index_bytes": index_bytes, "compression_ratio": ratio,
@@ -218,34 +236,36 @@ def superpose_state(file_id: str):
 @app.get("/stats/{file_id}")
 def stats(file_id: str):
     r = require(file_id)
-    return {"file_id": file_id, "accesses": r["access"], "size": r["size"],
+    return {"file_id": file_id, "accesses": r["access"] + 1, "size": r["size"],
             "chunk_count": r["chunk_count"], "created_at": r["created_at"]}
 
 
 @app.get("/search/{file_id}")
 def search(file_id: str, q: str = ""):
-    r = require(file_id)
+    require(file_id)
     ql = q.lower().strip()
     hits = []
     if ql:
-        for i, c in enumerate(r["_chunks"]):
-            n = c.lower().count(ql)
+        for c in get_chunks(file_id):
+            n = c["text"].lower().count(ql)
             if n:
-                pos = c.lower().find(ql)
-                snippet = c[max(0, pos - 40):pos + 60].strip().replace("\n", " ")
-                hits.append({"chunk": i, "score": n, "snippet": snippet})
+                pos = c["text"].lower().find(ql)
+                snip = c["text"][max(0, pos - 40):pos + 60].strip().replace("\n", " ")
+                hits.append({"chunk": c["idx"], "score": n, "snippet": snip})
         hits.sort(key=lambda h: -h["score"])
     return {"file_id": file_id, "q": q, "hits": hits[:25], "total": len(hits)}
 
 
 @app.get("/chunk/{file_id}/{idx}")
 def chunk(file_id: str, idx: int):
-    r = require(file_id)
-    if not (0 <= idx < len(r["_chunks"])):
-        raise HTTPException(404, {"error": "chunk_out_of_range",
-                                  "have": len(r["_chunks"])})
-    return {"file_id": file_id, "idx": idx, "text": r["_chunks"][idx],
-            "sha256": r["_chunk_hashes"][idx]}
+    require(file_id)
+    with db() as con:
+        row = con.execute(
+            "SELECT text, hash FROM chunks WHERE file_id=? AND idx=?",
+            (file_id, idx)).fetchone()
+    if row is None:
+        raise HTTPException(404, {"error": "chunk_out_of_range"})
+    return {"file_id": file_id, "idx": idx, "text": row["text"], "sha256": row["hash"]}
 
 
 # ─────────────────────────────── query ──────────────────────────────────
@@ -256,7 +276,7 @@ _FORBIDDEN = re.compile(r"\b(attach|pragma|insert|update|delete|drop|alter|"
 
 @app.post("/query/sql/{file_id}")
 def query_sql(file_id: str, body: SqlIn):
-    r = require(file_id)
+    require(file_id)
     sql = body.sql.strip().rstrip(";")
     if not _SELECT_ONLY.match(sql) or _FORBIDDEN.search(sql) or ";" in sql:
         raise HTTPException(400, {"error": "only single read-only SELECT allowed"})
@@ -264,8 +284,8 @@ def query_sql(file_id: str, body: SqlIn):
     con = sqlite3.connect(":memory:")
     con.execute("CREATE TABLE chunks(idx INTEGER, text TEXT, hash TEXT, length INTEGER)")
     con.executemany("INSERT INTO chunks VALUES (?,?,?,?)",
-                    [(i, c, r["_chunk_hashes"][i], len(c))
-                     for i, c in enumerate(r["_chunks"])])
+                    [(c["idx"], c["text"], c["hash"], c["length"])
+                     for c in get_chunks(file_id)])
     try:
         cur = con.execute(sql)
         cols = [d[0] for d in cur.description] if cur.description else []
@@ -278,11 +298,15 @@ def query_sql(file_id: str, body: SqlIn):
 
 
 # ───────────────────────────── superposition ────────────────────────────
+def _status(file_id: str) -> str:
+    with db() as con:
+        r = con.execute("SELECT revoked FROM files WHERE file_id=?", (file_id,)).fetchone()
+    return "session_not_found" if r is None else ("revoked" if r["revoked"] else "live")
+
+
 @app.post("/superpose/encode")
 def superpose_encode(file_ids: List[str] = Body(...)):
-    sessions = [{"id": fid, "status": ("live" if fid in REGISTRY
-                 and not REGISTRY[fid]["revoked"] else "unknown")}
-                for fid in file_ids]
+    sessions = [{"id": fid, "status": _status(fid)} for fid in file_ids]
     payload = json.dumps({"sessions": sessions, "created_at": time.time()}).encode()
     return {"blob": SUPERPOSE_PREFIX + base64.b64encode(payload).decode(),
             "count": len(sessions)}
@@ -297,16 +321,15 @@ def superpose_decode(blob: str = Body(..., embed=True)):
     except Exception:
         raise HTTPException(400, {"error": "corrupt_blob"})
     for s in data.get("sessions", []):
-        rec = REGISTRY.get(s["id"])
-        s["status"] = ("revoked" if rec and rec["revoked"]
-                       else "live" if rec else "session_not_found")
+        s["status"] = _status(s["id"])
     return data
 
 
 @app.post("/revoke/{file_id}")
 def revoke(file_id: str):
-    rec = REGISTRY.get(file_id)
-    if rec is None:
-        raise HTTPException(404, {"error": "file_not_found"})
-    rec["revoked"] = True
+    with db() as con:
+        r = con.execute("SELECT 1 FROM files WHERE file_id=?", (file_id,)).fetchone()
+        if r is None:
+            raise HTTPException(404, {"error": "file_not_found"})
+        con.execute("UPDATE files SET revoked=1 WHERE file_id=?", (file_id,))
     return {"file_id": file_id, "revoked": True}
