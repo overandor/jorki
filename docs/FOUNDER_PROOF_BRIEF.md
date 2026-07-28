@@ -46,17 +46,21 @@ Do **not** say: "independently attributable signature," "public offline verifica
 
 Every claim carries one of four states — **Proposed → Implemented → Tested → Independently reproduced** — and may only advance with evidence (repository component, test name, receipt artifact, or reproduction record).
 
-| Claim | State (2026-07-19) |
-|---|---|
-| Capsule integrity | Tested |
-| HMAC authentication | Tested |
-| Effect quiescence | Tested |
-| SQLite fencing | Tested |
-| Isolated runtime destruction | Proposed |
-| Stable SSH identity | Proposed |
-| Host A → Host B restoration | Proposed |
-| 100 successful migrations | Proposed |
-| External developer reproduction | Not started |
+| Claim | State (2026-07-25) | Evidence |
+|---|---|---|
+| Capsule integrity | Tested | [`proto/`](../proto/), [`macapp/`](../macapp/) |
+| HMAC authentication | Tested | `proto/` (shared-secret path) |
+| Cross-platform capsule continuation (Ed25519) | Tested | [hdar-cross-platform-proof](https://github.com/overandor/hdar-cross-platform-proof) — 84/84 + E2B 34/34; corroborated by a macOS→Linux run passing an offline third-party verifier 11/11 |
+| Host A → Host B restoration | Tested | Genuine second-host run: sealed on macOS, restored + continued on an independent Linux host, `platforms_differ` true, real Ed25519, offline verifier 11/11 |
+| Effect quiescence | Tested | — |
+| SQLite fencing | Tested | — |
+| Parallel fan-out coherence (Nonlocal Coherence) | Proposed | [spec v0.1](NONLOCAL_COHERENCE.md) + [reference](../macapp/reference/coherence_ref.py) selftest (8/8 third-party verifier); [priority record](PRIORITY.md) |
+| Isolated runtime destruction | Proposed | — |
+| Stable SSH identity | Proposed | — |
+| 100 successful migrations | Proposed | — |
+| External developer reproduction | Not started | The bar for "Independently reproduced": an unaffiliated developer clones and reproduces without founder involvement |
+
+**On "Independently reproduced":** no claim is marked *Independently reproduced* yet. The cross-platform run is genuine and passes an offline third-party verifier, but the verifier ran inside the founder's own session, not an unaffiliated party's. That row advances only when an outside developer reproduces it unaided.
 
 ## The first product has exactly one job
 
