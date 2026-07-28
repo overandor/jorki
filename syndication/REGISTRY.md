@@ -8,12 +8,12 @@ Status: ☐ not started · ◐ in progress (draft PR) · ☑ syndicated
 
 | Repo | What it is | Has SDK? | Has docs? | Status |
 |---|---|---|---|---|
-| [hdar](https://github.com/overandor/hdar) | Unified HDAR runtime (canonical) | yes (`hdar/`) | partial | ◐ flagship / reference |
+| [hdar](https://github.com/overandor/hdar) | Unified HDAR runtime (canonical) | yes (`hdar/`) | partial | ◐ draft PR [hdar#1](https://github.com/overandor/hdar/pull/1) |
 | [hdar-cross-platform-proof](https://github.com/overandor/hdar-cross-platform-proof) | Cross-platform Ed25519 proof + Rust verifier | partial | strong (`TRUST_BOUNDARY.md`) | ☐ |
 | [hdar-sdk](https://github.com/overandor/hdar-sdk) | Core SDK (superseded by `hdar`) | yes | yes | ☐ (archive candidate) |
 | [hdar-host-b-proof](https://github.com/overandor/hdar-host-b-proof) | E2B Host-B proof runner | partial | partial | ☐ (archive candidate) |
 | [hdar-hitelesites](https://github.com/overandor/hdar-hitelesites) | Portable protocol (marketing README) | partial | weak | ☐ (archive candidate) |
-| [jorki](https://github.com/overandor/jorki) | AI File Gateway Command Center — **candidate "FileOracle"** | ☐ | yes (`docs/`) | ☐ |
+| [jorki](https://github.com/overandor/jorki) | File Gateway UI; backend = **"FileOracle"** file-intelligence API (separate) | `useJorkiApi` hook | yes (`docs/`, `MODES.md`, `SDK.md`) | ◐ inline on [jorki#3](https://github.com/overandor/jorki/pull/3) |
 | [nyx-semantic](https://github.com/overandor/nyx-semantic) | Semantic system (needs inspection) | ? | ? | ☐ |
 | [DepthOS](https://github.com/overandor/DepthOS) | (needs inspection) | ? | ? | ☐ |
 | [jentic-egy](https://github.com/overandor/jentic-egy) | Diagnostics + Ed25519 attestation (folded into `hdar/morphos.py`) | ? | ? | ☐ |
@@ -24,12 +24,15 @@ Status: ☐ not started · ◐ in progress (draft PR) · ☑ syndicated
 | [CodeRunnerApp](https://github.com/overandor/CodeRunnerApp) | (needs inspection) | ? | ? | ☐ |
 | [snap2txt](https://github.com/overandor/snap2txt) | Screenshot→text (fork) | ? | ? | ☐ (fork) |
 
-## FileOracle — UNRESOLVED
+## FileOracle — LIKELY the jorki backend (not yet located)
 No repo named "FileOracle" exists, and a full search of this session's machine
-found nothing by that name. It is on the founder's Mac, on the gated
-`alep-local-systems` site, or a concept to be built. **Candidates:** `jorki`
-(the File Gateway) or the `hf-catacomb-oracle` repos. Awaiting identification
-before it can be syndicated.
+found nothing by that name. **Strongest lead:** jorki's UI
+(`src/hooks/useJorkiApi.js`) calls a same-origin file-intelligence backend —
+`/files`, `/meta`, `/summary`, `/capabilities`, `/superpose/state`, `/chunk`,
+`/query/sql` — which is almost certainly **FileOracle**. That backend is **not
+in any repo here**; it lives on the founder's Mac or the gated `alep-local-systems`
+site. To syndicate it, point me to its code (a Mac path or a paste). Until then
+it is documented as jorki's backend contract in [`../MODES.md`](../MODES.md).
 
 ## Rollout order
 1. `hdar` (flagship / reference — also fixes the misleading `verify_chains`
