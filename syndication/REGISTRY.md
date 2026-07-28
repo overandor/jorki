@@ -14,15 +14,15 @@ Status: ☐ not started · ◐ in progress (draft PR) · ☑ syndicated
 | [hdar-host-b-proof](https://github.com/overandor/hdar-host-b-proof) | E2B Host-B proof runner | partial | partial | ☐ (archive candidate) |
 | [hdar-hitelesites](https://github.com/overandor/hdar-hitelesites) | Portable protocol (marketing README) | partial | weak | ☐ (archive candidate) |
 | [jorki](https://github.com/overandor/jorki) | File Gateway UI; backend = **"FileOracle"** file-intelligence API (separate) | `useJorkiApi` hook | yes (`docs/`, `MODES.md`, `SDK.md`) | ◐ inline on [jorki#3](https://github.com/overandor/jorki/pull/3) |
-| [nyx-semantic](https://github.com/overandor/nyx-semantic) | Semantic system (needs inspection) | ? | ? | ☐ |
-| [DepthOS](https://github.com/overandor/DepthOS) | (needs inspection) | ? | ? | ☐ |
-| [jentic-egy](https://github.com/overandor/jentic-egy) | Diagnostics + Ed25519 attestation (folded into `hdar/morphos.py`) | ? | ? | ☐ |
+| [nyx-semantic](https://github.com/overandor/nyx-semantic) | Selector-free semantic DOM location (TF-IDF, no LLM) | yes (`nyx`) | strong README | ◐ draft PR [nyx-semantic#2](https://github.com/overandor/nyx-semantic/pull/2) |
+| ~~DepthOS~~ | Gate.io market-making / trading infra ("MarketForge") | — | — | ⛔ EXCLUDED — trading system, out of curated scope |
+| [jentic-egy](https://github.com/overandor/jentic-egy) | Diagnostics + Ed25519 attestation (folded into `hdar/morphos.py`) | ? | no README on default branch | ⚠️ near-empty / needs attention |
 | [hf-catacomb-oracle](https://github.com/overandor/hf-catacomb-oracle) | Private "oracle" repo — **candidate "FileOracle"** | ? | ? | ☐ (private) |
 | [hf-catacomb-oracle-v7](https://github.com/overandor/hf-catacomb-oracle-v7) | Private "oracle" repo (v7) | ? | ? | ☐ (private) |
-| [champ-lm](https://github.com/overandor/champ-lm) | (needs inspection) | ? | ? | ☐ |
-| [veis-cleanstat](https://github.com/overandor/veis-cleanstat) | (needs inspection) | ? | ? | ☐ |
-| [CodeRunnerApp](https://github.com/overandor/CodeRunnerApp) | (needs inspection) | ? | ? | ☐ |
-| [snap2txt](https://github.com/overandor/snap2txt) | Screenshot→text (fork) | ? | ? | ☐ (fork) |
+| [champ-lm](https://github.com/overandor/champ-lm) | LLM-ensemble research orchestration engine (Streamlit + Docker, CI) | `src/` components | strong README | ◐ draft PR [champ-lm#3](https://github.com/overandor/champ-lm/pull/3) |
+| [veis-cleanstat](https://github.com/overandor/veis-cleanstat) | Municipal data hardening (thin README → `docs/municipal-production-hardening.md`) | ? | thin | ☐ needs structure inspection |
+| [CodeRunnerApp](https://github.com/overandor/CodeRunnerApp) | HDAR & FileVM Passport Colab suite — **HDAR-family**, overlaps `hdar` | notebooks | yes | ☐ (HDAR-family; consolidate vs syndicate) |
+| [snap2txt](https://github.com/overandor/snap2txt) | Screenshot→text (fork) | ? | ? | ☐ (fork — likely skip) |
 
 ## FileOracle — LIKELY the jorki backend (not yet located)
 No repo named "FileOracle" exists, and a full search of this session's machine
