@@ -16,6 +16,11 @@ pip install -r requirements.txt
 uvicorn app:app --reload            # http://127.0.0.1:8000  ·  /docs for OpenAPI
 ```
 
+Open **http://127.0.0.1:8000/** — it serves a **live landing page + playground**
+(`index.html`) same-origin, so you can paste content, index it, and run search /
+SQL / superpose against this backend right in the browser. No frontend build
+needed for the demo.
+
 Wire the UI to it: `npm run dev` already proxies the API paths to the backend
 (see `../vite.config.js`), so the console and engine run together with no code
 change. Point at a remote backend with `VITE_API_TARGET=https://… npm run dev`.

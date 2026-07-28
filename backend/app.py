@@ -33,6 +33,7 @@ from typing import Any, Dict, List
 
 from fastapi import FastAPI, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 app = FastAPI(title="Jorki Backend", version="0.2.0",
@@ -139,6 +140,17 @@ class IndexIn(BaseModel):
 
 class SqlIn(BaseModel):
     sql: str
+
+
+# ─────────────────────────────── landing ────────────────────────────────
+_INDEX_HTML = os.path.join(os.path.dirname(__file__), "index.html")
+
+
+@app.get("/", include_in_schema=False)
+def landing():
+    """Live landing page + playground served same-origin, so its fetch() calls
+    hit the endpoints below directly."""
+    return FileResponse(_INDEX_HTML)
 
 
 # ─────────────────────────────── ingest ─────────────────────────────────
