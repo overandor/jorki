@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Jorki Gateway — a file gateway you can try right now</title>
+<style>
+  :root{
+    color-scheme:dark;
+    --bg:#08090A;--surface:#111417;--surface-2:#171A20;--grid:#1E2329;--line:#242B33;--line-2:#2E3742;
+    --primary:#FF8A00;--accent:#FFB347;--success:#32D74B;--critical:#FF453A;
+    --text:#F5F5F7;--secondary:#A1A1AA;--dim:#6A7078;
+    --mono:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+    --sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:960px;margin:0 auto;padding:0 22px}
+  a{color:var(--primary);text-decoration:none}
+  h1,h2,h3{margin:0;letter-spacing:-.02em;line-height:1.05;text-wrap:balance}
+  h1{font-size:clamp(34px,6vw,60px);font-weight:700}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--primary);font-weight:600}
+  .lead{color:var(--secondary);font-size:clamp(16px,1.8vw,19px);max-width:60ch;margin-top:18px}
+  .mono{font-family:var(--mono)}
+  header.bar{position:sticky;top:0;z-index:5;background:rgba(8,9,10,.8);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .bar-in{height:58px;display:flex;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+  .jmark{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-weight:900;color:#0A0A0A;background:linear-gradient(135deg,var(--primary),var(--accent))}
+  .live{font-family:var(--mono);font-size:12px;color:var(--success);display:inline-flex;gap:7px;align-items:center;border:1px solid var(--line-2);border-radius:999px;padding:5px 11px}
+  .live .d{width:7px;height:7px;border-radius:50%;background:var(--success)}
+  .live.off .d{background:var(--critical)}.live.off{color:var(--critical)}
+  section{padding:48px 0;border-top:1px solid var(--line)}
+  .hero{padding:60px 0 40px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);display:block;margin-bottom:6px}
+  textarea,input{width:100%;background:var(--bg);border:1px solid var(--line-2);border-radius:9px;color:var(--text);font-family:var(--mono);font-size:13px;padding:11px}
+  textarea{min-height:150px;resize:vertical;line-height:1.5}
+  input:focus,textarea:focus{outline:2px solid var(--primary);outline-offset:1px;border-color:transparent}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+  button{font-family:var(--mono);font-size:13px;font-weight:600;padding:11px 17px;border-radius:9px;border:1px solid transparent;cursor:pointer;transition:transform .12s,border-color .12s}
+  button.primary{background:var(--primary);color:#0A0A0A}
+  button.primary:hover{transform:translateY(-1px)}
+  button.ghost{background:transparent;border-color:var(--line-2);color:var(--text)}
+  button.ghost:hover{border-color:var(--primary);color:var(--primary)}
+  .out{margin-top:14px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px;font-family:var(--mono);font-size:12.5px;overflow-x:auto}
+  .out .k{color:var(--dim)}.out .v{color:var(--accent)}.out .ok{color:var(--success)}
+  .pill{display:inline-block;font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);color:var(--secondary);margin:2px 4px 2px 0}
+  table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:12.5px}
+  th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line)}
+  th{color:var(--dim);font-weight:600;text-transform:uppercase;font-size:10.5px;letter-spacing:.08em}
+  .muted{color:var(--secondary)}
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .step .n{font-family:var(--mono);font-size:12px;color:var(--primary)}
+  .step h4{margin:6px 0 3px;font-size:14px}.step p{font-size:12.5px;color:var(--secondary)}
+  .epgrid{display:flex;flex-wrap:wrap;gap:6px}
+  footer{border-top:1px solid var(--line);padding:36px 0 56px;color:var(--secondary);font-size:13px}
+  @media(max-width:720px){.grid2,.steps{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="bar"><div class="wrap bar-in">
+  <div class="brand"><span class="jmark">J</span> Jorki Gateway</div>
+  <span class="live off" id="live"><span class="d"></span> connecting…</span>
+</div></header>
+
+<main>
+  <section class="hero" style="border-top:none"><div class="wrap">
+    <p class="eyebrow">Content-addressed · metadata-only · no LLM</p>
+    <h1>A file gateway you can try right now.</h1>
+    <p class="lead">Paste something below and index it. You get a content-addressed id, a Merkle root, a deterministic summary, in-file search, and read-only SQL over its chunks — served by this backend, with <strong>zero calls to any external model</strong>. Nothing you paste leaves this server.</p>
+  </div></section>
+
+  <section><div class="wrap">
+    <div class="steps">
+      <div class="step"><div class="n">01</div><h4>Index</h4><p>SHA-256 id + Merkle root.</p></div>
+      <div class="step"><div class="n">02</div><h4>Summarize</h4><p>Symbols &amp; terms, no LLM.</p></div>
+      <div class="step"><div class="n">03</div><h4>Query</h4><p>Search + read-only SQL.</p></div>
+      <div class="step"><div class="n">04</div><h4>Superpose</h4><p>Many files, one blob.</p></div>
+    </div>
+  </div></section>
+
+  <section><div class="wrap">
+    <div class="card">
+      <label for="name">Filename</label>
+      <input id="name" value="worker.py" spellcheck="false" />
+      <label for="content" style="margin-top:12px">Content to index</label>
+      <textarea id="content" spellcheck="false">def alpha(x):
+    return x + 1
+
+def beta(y):
+    # privacy matters here — this text stays on the server
+    return y * 2
+
+class Gateway:
+    """Serves file intelligence from metadata only."""
+    pass
+</textarea>
+      <div class="row">
+        <button class="primary" id="btnIndex">Index this →</button>
+        <span class="muted mono" id="fid"></span>
+      </div>
+      <div class="out" id="indexOut" style="display:none"></div>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="card">
+        <label for="q">Search in the file</label>
+        <input id="q" value="privacy" spellcheck="false" />
+        <div class="row"><button class="ghost" id="btnSearch">Search</button></div>
+        <div class="out" id="searchOut" style="display:none"></div>
+      </div>
+      <div class="card">
+        <label for="sql">Read-only SQL over chunks</label>
+        <input id="sql" value="SELECT idx, length FROM chunks ORDER BY length DESC LIMIT 5" spellcheck="false" />
+        <div class="row"><button class="ghost" id="btnSql">Run SELECT</button></div>
+        <div class="out" id="sqlOut" style="display:none"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="row" style="margin-top:0">
+        <button class="ghost" id="btnSuper">Superpose this file → JORKI:v1 blob</button>
+      </div>
+      <div class="out" id="superOut" style="display:none"></div>
+    </div>
+  </div></section>
+
+  <section><div class="wrap">
+    <p class="eyebrow">The surface</p>
+    <h3 style="margin:8px 0 14px">Every answer is an endpoint.</h3>
+    <div class="epgrid" id="eps"></div>
+    <p class="muted" style="margin-top:14px">Full OpenAPI at <a href="/docs">/docs</a>.</p>
+  </div></section>
+</main>
+
+<footer><div class="wrap">
+  Jorki Gateway — content-addressed (<span class="mono">sha256[:12]</span>), Merkle receipts, SQLite-persistent, zero external LLM calls. Content stays on the host you run this on.
+</div></footer>
+
+<script>
+const $ = (id)=>document.getElementById(id);
+let currentId = null;
+
+async function api(path, opts){
+  const r = await fetch(path, opts);
+  const body = await r.json().catch(()=>({}));
+  if(!r.ok) throw Object.assign(new Error('http '+r.status), {body});
+  return body;
+}
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+async function health(){
+  const el = $('live');
+  try{
+    const h = await api('/health');
+    el.className='live'; el.innerHTML='<span class="d"></span> online · '+h.files_registered+' files · llm_calls '+h.llm_calls;
+  }catch(e){ el.className='live off'; el.innerHTML='<span class="d"></span> backend offline — run: uvicorn app:app'; }
+}
+
+$('btnIndex').onclick = async ()=>{
+  const out=$('indexOut'); out.style.display='block'; out.textContent='indexing…';
+  try{
+    const r = await api('/index',{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({name:$('name').value, content:$('content').value})});
+    currentId = r.file_id; $('fid').textContent='file_id '+r.file_id;
+    const s = await api('/summary/'+r.file_id);
+    out.innerHTML =
+      '<div><span class="k">file_id</span> <span class="ok">'+r.file_id+'</span>  '
+      +'<span class="k">merkle</span> <span class="v">'+r.merkle_root.slice(0,24)+'…</span>  '
+      +'<span class="k">chunks</span> <span class="v">'+r.chunk_count+'</span></div>'
+      +'<div style="margin-top:8px"><span class="k">symbols:</span> '
+      +(s.symbols.length?s.symbols.map(x=>'<span class="pill">'+esc(x)+'</span>').join(''):'<span class="muted">none</span>')+'</div>'
+      +'<div style="margin-top:6px"><span class="k">top terms:</span> '
+      +s.top_terms.slice(0,8).map(t=>'<span class="pill">'+esc(t.term)+' ·'+t.count+'</span>').join('')+'</div>';
+    health();
+  }catch(e){ out.innerHTML='<span style="color:var(--critical)">error: '+esc(JSON.stringify(e.body||e.message))+'</span>'; }
+};
+
+$('btnSearch').onclick = async ()=>{
+  const out=$('searchOut'); out.style.display='block';
+  if(!currentId){ out.textContent='index a file first'; return; }
+  try{
+    const r = await api('/search/'+currentId+'?q='+encodeURIComponent($('q').value));
+    out.innerHTML = r.total===0 ? '<span class="muted">no matches</span>'
+      : '<div class="k">'+r.total+' hit(s)</div>'+r.hits.map(h=>'<div style="margin-top:4px"><span class="v">#'+h.chunk+'</span> ·'+h.score+' <span class="muted">'+esc(h.snippet)+'</span></div>').join('');
+  }catch(e){ out.innerHTML='<span style="color:var(--critical)">'+esc(JSON.stringify(e.body||e.message))+'</span>'; }
+};
+
+$('btnSql').onclick = async ()=>{
+  const out=$('sqlOut'); out.style.display='block';
+  if(!currentId){ out.textContent='index a file first'; return; }
+  try{
+    const r = await api('/query/sql/'+currentId,{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({sql:$('sql').value})});
+    if(!r.rows.length){ out.innerHTML='<span class="muted">0 rows</span>'; return; }
+    out.innerHTML='<table><thead><tr>'+r.columns.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr></thead><tbody>'
+      +r.rows.map(row=>'<tr>'+r.columns.map(c=>'<td>'+esc(row[c])+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
+  }catch(e){ out.innerHTML='<span style="color:var(--critical)">rejected: '+esc(JSON.stringify(e.body||e.message))+'</span>'; }
+};
+
+$('btnSuper').onclick = async ()=>{
+  const out=$('superOut'); out.style.display='block';
+  if(!currentId){ out.textContent='index a file first'; return; }
+  try{
+    const r = await api('/superpose/encode',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify([currentId])});
+    out.innerHTML='<span class="k">blob</span> <span class="v" style="word-break:break-all">'+esc(r.blob)+'</span>';
+  }catch(e){ out.innerHTML='<span style="color:var(--critical)">'+esc(JSON.stringify(e.body||e.message))+'</span>'; }
+};
+
+['/index','/health','/files','/meta/{id}','/summary/{id}','/capabilities/{id}','/superpose/state/{id}','/stats/{id}','/search/{id}?q=','/chunk/{id}/{idx}','/query/sql/{id}','/superpose/encode','/superpose/decode','/revoke/{id}']
+  .forEach(p=>{ const s=document.createElement('span'); s.className='pill'; s.textContent=p; $('eps').appendChild(s); });
+
+health(); setInterval(health, 8000);
+</script>
+</body>
+</html>
