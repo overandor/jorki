@@ -16,6 +16,7 @@ Documents describing the hardware-detached agent runtime and the economic machin
 | [The Four-System Pipe](AGENT_ECONOMY_ARCHITECTURE.md) | Combines the runtime with a compute resolver, proof network, and settlement engine into one protocol with four authorities: continuity, embodiment, truth, and value. |
 | [Proof-of-Answer](PROOF_OF_ANSWER.md) | The receipt-backed outcome primitive that lets a durable agent identity earn revenue for verified intellectual work while its compute providers change. |
 | [Nonlocal Coherence](NONLOCAL_COHERENCE.md) | Draft `v0.1` protocol extending the sequential capsule proof to the **parallel** case: fan a sealed capsule out to N shards, each signing its partial, then certify the distributed result equals a single-pass result under a signed quorum. Honest prior-art positioning; priority record in [PRIORITY.md](PRIORITY.md). |
+| [FileOracle](FILEORACLE.md) | The live file-intelligence gateway behind jorki (FastAPI, metadata-only privacy model, deployed on HF Space). Canonical source, API surface, privacy pipeline, and the recommendation to extract it into its own repo. |
 | [MirrorLease](MIRRORLEASE.md) | A palindromic lease protocol between an AI conversation and a self-defending local machine: disposable mailboxes, narrow temporary permissions, staged disclosure, forward-and-reverse receipts, and automatic expiration — the owner keeps control. |
 
 ## Runnable artifacts

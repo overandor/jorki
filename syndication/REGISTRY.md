@@ -24,15 +24,18 @@ Status: ☐ not started · ◐ in progress (draft PR) · ☑ syndicated
 | [CodeRunnerApp](https://github.com/overandor/CodeRunnerApp) | HDAR & FileVM Passport Colab suite — **HDAR-family**, overlaps `hdar` | notebooks | yes | ☐ (HDAR-family; consolidate vs syndicate) |
 | [snap2txt](https://github.com/overandor/snap2txt) | Screenshot→text (fork) | ? | ? | ☐ (fork — likely skip) |
 
-## FileOracle — LIKELY the jorki backend (not yet located)
-No repo named "FileOracle" exists, and a full search of this session's machine
-found nothing by that name. **Strongest lead:** jorki's UI
-(`src/hooks/useJorkiApi.js`) calls a same-origin file-intelligence backend —
-`/files`, `/meta`, `/summary`, `/capabilities`, `/superpose/state`, `/chunk`,
-`/query/sql` — which is almost certainly **FileOracle**. That backend is **not
-in any repo here**; it lives on the founder's Mac or the gated `alep-local-systems`
-site. To syndicate it, point me to its code (a Mac path or a paste). Until then
-it is documented as jorki's backend contract in [`../MODES.md`](../MODES.md).
+## FileOracle — LOCATED & LIVE ✅
+FileOracle is the file-intelligence backend behind jorki. Found by tracing its
+endpoint fingerprints (`/superpose/state`, `/query/sql`).
+- **Live:** `https://josephrw-llm-file-proxy.hf.space`
+- **Canonical source:** `overandor/glyphos` → `hf_space_app.py` (+ `afc_server.py`,
+  `SPEC/JORKI_PRODUCT_SPEC.md`, `docs/jorki-ai-file-gateway-production-audit.md`)
+- **Clean variant:** `overandor/rentmasseur-unified` → `variants/daemon/llm_file_proxy/`
+- **Full product doc:** [`../docs/FILEORACLE.md`](../docs/FILEORACLE.md)
+
+**Recommended:** extract it into its own repo (`overandor/fileoracle`) from the
+`rentmasseur-unified` variant, apply mode/SDK/docs, and settle on one name
+(FileOracle vs SystemLake vs Jorki-gateway).
 
 ## Rollout order
 1. `hdar` (flagship / reference — also fixes the misleading `verify_chains`
