@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Database, Terminal, FileText, Loader2, ChevronRight } from 'lucide-react'
 
-const API_BASE = ''
+import { API_BASE } from '../config'
 
 export default function QueryPanel() {
   const [files, setFiles] = useState([])

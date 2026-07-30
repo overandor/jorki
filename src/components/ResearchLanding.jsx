@@ -8,7 +8,7 @@ import {
   TrendingUp, ScrollText, Gauge, FlaskConical,
 } from 'lucide-react'
 
-const API_BASE = ''
+import { API_BASE } from '../config'
 
 const ENDPOINT_CATALOG = [
   { group: 'Core', endpoints: [

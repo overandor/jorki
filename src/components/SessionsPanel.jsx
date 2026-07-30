@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Monitor, X, Activity, Database, Clock, Hash } from 'lucide-react'
 
-const API_BASE = ''
+import { API_BASE } from '../config'
 
 export default function SessionsPanel() {
   const [files, setFiles] = useState([])

@@ -6,7 +6,7 @@ import {
   FileText, TrendingUp, Activity, Eye,
 } from 'lucide-react'
 
-const API_BASE = ''
+import { API_BASE } from '../config'
 
 const GLYPHS = {
   dna: '◇', ml: '⟡', valuation: '$', profile: '§', kpi: '#',

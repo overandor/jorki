@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FileText, Shield, Activity, Copy, Check, Search, ArrowRight, UploadCloud, Loader2, X, Dna, BookOpen } from 'lucide-react'
 
-const API_BASE = ''
+import { API_BASE } from '../config'
 
 export default function Dashboard({ setActivePanel, onSelectFile }) {
   const [health, setHealth] = useState(null)

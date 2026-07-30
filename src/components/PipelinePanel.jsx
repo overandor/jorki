@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 import FileDossier from './FileDossier.jsx'
 
-const API_BASE = ''
+import { API_BASE } from '../config'
 
 const STAGES = [
   { id: 'clipboard', label: 'Clipboard', glyph: '⌁', icon: Clipboard, desc: 'Read clipboard content' },

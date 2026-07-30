@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { BookOpen, ChevronDown, ChevronRight, Loader2, AlertTriangle, Copy, Check } from 'lucide-react'
 
-const API_BASE = ''
+import { API_BASE } from '../config'
 
 export default function FormulasPanel() {
   const [data, setData] = useState(null)
