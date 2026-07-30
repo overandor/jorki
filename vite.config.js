@@ -8,7 +8,7 @@ import react from '@vitejs/plugin-react'
 const API_TARGET = process.env.VITE_API_TARGET || 'http://127.0.0.1:8000'
 const API_PATHS = [
   '/health', '/files', '/meta', '/summary', '/capabilities', '/superpose',
-  '/stats', '/search', '/chunk', '/query', '/index', '/revoke',
+  '/stats', '/search', '/chunk', '/query', '/index', '/revoke', '/market',
 ]
 
 export default defineConfig({
@@ -16,6 +16,7 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
+    allowedHosts: true,
     proxy: Object.fromEntries(
       API_PATHS.map((p) => [p, { target: API_TARGET, changeOrigin: true }])
     ),

@@ -27,6 +27,9 @@ import os
 import re
 import sqlite3
 import time
+import urllib.error
+import urllib.parse
+import urllib.request
 from collections import Counter
 from contextlib import contextmanager
 from typing import Any, Dict, List
@@ -184,6 +187,85 @@ def index_file(body: IndexIn):
 
 
 # ─────────────────────────────── read ───────────────────────────────────
+_EXTERNAL_CACHE: Dict[str, Dict[str, Any]] = {}
+CACHE_TTL = 120
+
+
+def fetch_json(url: str, cache_key: str, ttl: int = CACHE_TTL) -> Dict[str, Any]:
+    """Fetch a public JSON feed with bounded caching and stale-on-error fallback."""
+    cached = _EXTERNAL_CACHE.get(cache_key)
+    now = time.time()
+    if cached and now - cached["fetched_at"] < ttl:
+        return {"data": cached["data"], "fetched_at": cached["fetched_at"], "stale": False}
+    request = urllib.request.Request(url, headers={"User-Agent": "Jorki-Market-Terminal/1.0"})
+    try:
+        with urllib.request.urlopen(request, timeout=12) as response:
+            data = json.loads(response.read().decode("utf-8"))
+        _EXTERNAL_CACHE[cache_key] = {"data": data, "fetched_at": now}
+        return {"data": data, "fetched_at": now, "stale": False}
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
+        if cached:
+            return {"data": cached["data"], "fetched_at": cached["fetched_at"], "stale": True}
+        raise HTTPException(503, {"error": "upstream_unavailable", "source": cache_key, "detail": str(exc)})
+
+
+@app.get("/market/overview")
+def market_overview():
+    markets_url = (
+        "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd"
+        "&order=market_cap_desc&per_page=30&page=1&sparkline=true&price_change_percentage=24h,7d"
+    )
+    global_feed = fetch_json("https://api.coingecko.com/api/v3/global", "coingecko-global")
+    markets_feed = fetch_json(markets_url, "coingecko-markets")
+    trending_feed = fetch_json("https://api.coingecko.com/api/v3/search/trending", "coingecko-trending", 300)
+    coins = markets_feed["data"]
+    total_volume = sum(float(c.get("total_volume") or 0) for c in coins)
+    weighted_change = (
+        sum(float(c.get("price_change_percentage_24h") or 0) * float(c.get("total_volume") or 0) for c in coins)
+        / total_volume if total_volume else 0
+    )
+    gainers = len([c for c in coins if float(c.get("price_change_percentage_24h") or 0) > 0])
+    breadth = gainers / len(coins) if coins else 0
+    return {
+        "source": "CoinGecko",
+        "fetched_at": min(global_feed["fetched_at"], markets_feed["fetched_at"]),
+        "stale": global_feed["stale"] or markets_feed["stale"],
+        "global": global_feed["data"].get("data", {}),
+        "coins": coins,
+        "trending": [item.get("item", {}) for item in trending_feed["data"].get("coins", [])],
+        "derived": {
+            "weighted_change_24h": weighted_change,
+            "market_breadth": breadth,
+            "liquidity_concentration": (sum(float(c.get("total_volume") or 0) for c in coins[:5]) / total_volume) if total_volume else 0,
+            "realized_volatility": sum(abs(float(c.get("price_change_percentage_24h") or 0)) for c in coins) / len(coins) if coins else 0,
+        },
+    }
+
+
+@app.get("/market/narratives")
+def market_narratives(q: str = "cryptocurrency OR bitcoin OR ethereum"):
+    safe_query = urllib.parse.quote(q[:120])
+    url = (
+        "https://api.gdeltproject.org/api/v2/doc/doc?"
+        f"query={safe_query}&mode=artlist&maxrecords=30&format=json&sort=datedesc"
+    )
+    feed = fetch_json(url, f"gdelt-{safe_query}", 300)
+    articles = feed["data"].get("articles", [])
+    return {
+        "source": "GDELT DOC 2.0",
+        "fetched_at": feed["fetched_at"],
+        "stale": feed["stale"],
+        "articles": [{
+            "title": article.get("title", "Untitled"),
+            "url": article.get("url", ""),
+            "domain": article.get("domain", ""),
+            "language": article.get("language", ""),
+            "seen_at": article.get("seendate", ""),
+            "image": article.get("socialimage", ""),
+        } for article in articles],
+    }
+
+
 @app.get("/health")
 def health():
     with db() as con:
