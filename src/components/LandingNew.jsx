@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, Shield, Copy, Check, ExternalLink } from 'lucide-react'
 
-const API_BASE = 'https://josephrw-llm-file-proxy.hf.space'
+import { API_BASE } from '../config'
 
 export default function Landing({ onLaunch }) {
   const [health, setHealth] = useState(null)

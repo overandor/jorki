@@ -5,7 +5,7 @@ import {
   Database, Hash, Activity, Code,
 } from 'lucide-react'
 
-const API_BASE = ''
+import { API_BASE } from '../config'
 
 export default function FileDetail({ fileId, onClear }) {
   const [files, setFiles] = useState([])

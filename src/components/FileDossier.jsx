@@ -6,7 +6,7 @@ import {
   ChevronDown, ChevronRight, Copy, Check, Eye, Code, Sparkles,
 } from 'lucide-react'
 
-const API_BASE = ''
+import { API_BASE } from '../config'
 
 const GRADE_COLORS = {
   A: 'text-success', B: 'text-success', C: 'text-warning',

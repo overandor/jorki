@@ -14,7 +14,7 @@ import APIPanel from './APIPanel.jsx'
 import SettingsPanel from './SettingsPanel.jsx'
 import PipelinePanel from './PipelinePanel.jsx'
 
-const API_BASE = ''
+import { API_BASE } from '../config'
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Home },

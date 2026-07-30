@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Activity, Key, RefreshCw, Zap, AlertTriangle, CheckCircle, XCircle, Clock, Plus, Cpu, TrendingUp, Gauge } from 'lucide-react'
 
-const API_BASE = ''
+import { API_BASE } from '../config'
 const GLYPHS = { active: '◉', expired: '⟁', rate_limited: '⧖', invalid: '✕', untested: '◌', unknown: '◌', loading: '◍' }
 const COLORS = { active: 'text-emerald-400', expired: 'text-red-400', rate_limited: 'text-amber-400', invalid: 'text-red-500', untested: 'text-zinc-500', unknown: 'text-zinc-500', loading: 'text-blue-400' }
 const PULSE = { active: true, expired: false, rate_limited: true, invalid: false, untested: false, unknown: false, loading: true }

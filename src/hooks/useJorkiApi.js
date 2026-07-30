@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 
-const API_BASE = ''
+import { API_BASE } from '../config'
 
 export function useJorkiApi() {
   const [health, setHealth] = useState(null)

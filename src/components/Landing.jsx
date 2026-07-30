@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowRight, Shield, Copy, Check, ExternalLink } from 'lucide-react'
 
-const API_BASE = ''
+import { API_BASE } from '../config'
 
 export default function Landing({ onLaunch }) {
   const [health, setHealth] = useState(null)
