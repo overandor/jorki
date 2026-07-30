@@ -102,11 +102,11 @@ function OracleDashboard({ market, narratives }) {
   </main>
 }
 
-export default function MarketDashboards({ mode }) {
+export default function MarketDashboards({ mode, onOpenTools }) {
   const { market, narratives } = useMarketData()
   const [query, setQuery] = useState('')
   if (market.isLoading) return <main className="loading-state"><md-circular-progress indeterminate aria-label="Loading production market data" /><p>ESTABLISHING MARKET UPLINK</p></main>
-  if (market.error) return <main className="error-state"><md-icon>cloud_off</md-icon><h1>Market uplink unavailable</h1><p>The dashboard never substitutes fabricated values. Retry CoinGecko to continue.</p><md-filled-button onClick={() => market.mutate()}>Retry source</md-filled-button></main>
+  if (market.error) return <main className="error-state"><md-icon>cloud_off</md-icon><h1>Market uplink unavailable</h1><p>CoinGecko is not responding. Market panels stay empty rather than showing fabricated values, but your file tools remain available.</p><div className="error-actions"><md-filled-button onClick={() => market.mutate()}><md-icon slot="icon">refresh</md-icon>Retry CoinGecko</md-filled-button><md-outlined-button onClick={onOpenTools}><md-icon slot="icon">upload_file</md-icon>Open file tools</md-outlined-button></div></main>
   const marketData = market.data
   const narrativeData = narratives.data || { articles: [], fetched_at: marketData.fetched_at, stale: true, unavailable: true }
   const filtered = query ? { ...marketData, coins: marketData.coins.filter(c => `${c.name} ${c.symbol}`.toLowerCase().includes(query.toLowerCase())) } : marketData

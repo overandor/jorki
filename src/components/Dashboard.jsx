@@ -66,17 +66,21 @@ export default function Dashboard({ setActivePanel, onSelectFile }) {
       const fd = new FormData()
       fd.append('file', file)
       const res = await fetch(`${API_BASE}/index`, { method: 'POST', body: fd })
-      const data = await res.json()
-      if (data.error) {
-        setUploadResult({ error: data.error })
-      } else {
-        setUploadResult({ success: true, file_id: data.file_id, filename: data.filename, chunks: data.total_chunks, lines: data.total_lines })
-        fetchAll()
+      const contentType = res.headers.get('content-type') || ''
+      const data = contentType.includes('application/json')
+        ? await res.json()
+        : { error: await res.text() }
+      if (!res.ok || data.error) {
+        const detail = typeof data.detail === 'string' ? data.detail : data.error
+        throw new Error(detail || `Upload failed with status ${res.status}`)
       }
+      setUploadResult({ success: true, file_id: data.file_id, filename: data.filename, chunks: data.total_chunks, lines: data.total_lines })
+      fetchAll()
     } catch (e) {
-      setUploadResult({ error: e.message })
+      setUploadResult({ error: e.message || 'The file could not be uploaded. Check the backend connection and retry.' })
     } finally {
       setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }, [fetchAll])
 
@@ -181,6 +185,7 @@ export default function Dashboard({ setActivePanel, onSelectFile }) {
                 <>
                   <X className="w-6 h-6 text-critical" />
                   <div className="text-sm text-critical">{uploadResult.error}</div>
+                  <div className="text-[10px] text-secondary font-mono">Select the same file again after checking the backend connection.</div>
                 </>
               ) : (
                 <>
